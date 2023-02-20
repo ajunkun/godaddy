@@ -18,13 +18,14 @@ def get_t_minus_n_period(df: pd.DataFrame, column_nm: str, n_period: int) -> pd.
     return df
 
 
-def align_feature_period(feature_df: pd.DataFrame, label_df: pd.DataFrame, period: int = 1) -> pd.DataFrame:
-    """
-    align period and feature dataframes for forecasting
-    :param feature_df:
-    :param label_df:
-    :param period:
-    :return:
-    """
+def populate_period(feature_df: pd.DataFrame, col_nm: str, freq_tp: str) -> pd.DataFrame:
+    if freq_tp == 'yearly':
+        month_df = pd.DataFrame({'month': [f'{str(i).zfill(2)}-01' for i in range(1, 13)]})
 
-    pass
+        # cross join
+        feature_df['tmp_key'] = 0
+        month_df['tmp_key'] = 0
+        feature_df = feature_df.merge(month_df, on='tmp_key', how='outer')
+        feature_df = feature_df.drop(columns='tmp_key')
+
+    return feature_df
