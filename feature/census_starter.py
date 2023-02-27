@@ -8,17 +8,7 @@ def cln_census_starter_df(census_df: pd.DataFrame) -> pd.DataFrame:
     feature_nms = list(set([col[:-5] for col in feature_cols]))
 
     tmp_df = pd.melt(census_df, id_vars='cfips', value_vars=feature_cols, var_name='feature')
-    tmp_df.loc[:, 'year'] = tmp_df['feature'].str[-4:]
+    tmp_df.loc[:, 'year'] = tmp_df['feature'].str[-4:].astype(int)
     tmp_df.loc[:, 'feature'] = tmp_df['feature'].str[:-5]
     census_features = pd.pivot_table(tmp_df, index=['cfips', 'year'], columns='feature', values='value').reset_index()
-
-    # populate 12 months
-    # month_df = pd.DataFrame({'month': [f'{str(i).zfill(2)}-01' for i in range(1, 13)]})
-
-    # cross join
-    # census_features['tmp_key'] = 0
-    # month_df['tmp_key'] = 0
-
-    # census_features = census_features.merge(month_df, on='tmp_key', how='outer')
-    # census_features = census_features.drop(columns='tmp_key')
     return census_features
