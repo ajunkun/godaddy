@@ -11,4 +11,7 @@ CENSUS_STARTER_PATH = os.path.join(DATA_PATH, 'census_starter.csv')
 
 OUTPUT_PATH = os.path.join(DIR_PATH, 'output')
 
-n_period = 12
+lookback_steps = 12
+predict_steps = 6
+
+train_size = 0.8

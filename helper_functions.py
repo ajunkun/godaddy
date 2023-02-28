@@ -11,7 +11,7 @@ def get_timestep(train_df: pd.DataFrame) -> pd.DataFrame:
     return time_idx
 
 
-def get_md_series(train_df):
+def get_md_series(train_df) -> darts.TimeSeries:
     series = train_df[['first_day_of_month', 'cfips', 'microbusiness_density']]
     series = darts.TimeSeries.from_group_dataframe(series, group_cols='cfips', time_col='first_day_of_month',
                                                    value_cols='microbusiness_density')
@@ -21,6 +21,9 @@ def get_md_series(train_df):
 def convert_feats_to_series(feature_df: pd.DataFrame) -> darts.TimeSeries:
     feature_cols = [col for col in list(feature_df.columns) if col not in ['time_step', 'cfips',
                                                                            'year', 'month', 'day']]
+    for col in feature_cols:
+        feature_df[col] = feature_df.groupby('cfips')[col].transform(lambda v: v.ffill())
+
     feat_series = darts.TimeSeries.from_group_dataframe(feature_df, group_cols='cfips', time_col='time_step',
                                                         value_cols=feature_cols)
     return feat_series
