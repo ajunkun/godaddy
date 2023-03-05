@@ -1,29 +1,13 @@
 import pandas as pd
-import darts
+import numpy as np
 
 
-def get_timestep(train_df: pd.DataFrame) -> pd.DataFrame:
-    time_idx = train_df[['first_day_of_month', 'cfips']].drop_duplicates()
-    time_idx.columns = ['time_step', 'cfips']
-    time_idx['year'] = time_idx['time_step'].dt.year
-    time_idx['month'] = time_idx['time_step'].dt.month
-    time_idx['day'] = time_idx['time_step'].dt.day
-    return time_idx
-
-
-def get_md_series(train_df) -> darts.TimeSeries:
-    series = train_df[['first_day_of_month', 'cfips', 'microbusiness_density']]
-    series = darts.TimeSeries.from_group_dataframe(series, group_cols='cfips', time_col='first_day_of_month',
-                                                   value_cols='microbusiness_density')
-    return series
-
-
-def convert_feats_to_series(feature_df: pd.DataFrame) -> darts.TimeSeries:
-    feature_cols = [col for col in list(feature_df.columns) if col not in ['time_step', 'cfips',
-                                                                           'year', 'month', 'day']]
-    for col in feature_cols:
-        feature_df[col] = feature_df.groupby('cfips')[col].transform(lambda v: v.ffill())
-
-    feat_series = darts.TimeSeries.from_group_dataframe(feature_df, group_cols='cfips', time_col='time_step',
-                                                        value_cols=feature_cols)
-    return feat_series
+def smape_comp(y_true, y_pred):
+    """
+    Calculate Symmetric Mean Absolute Percentage Error (SMAPE)
+    """
+    mask = (y_true != 0) | (y_pred != 0)
+    denominator = (np.abs(y_true) + np.abs(y_pred)) / 2
+    numerator = np.abs(y_true - y_pred)
+    smape_val = np.where(mask, numerator / denominator, 0)
+    return np.mean(smape_val) * 100
